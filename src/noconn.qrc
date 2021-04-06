@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>noconn.qml</file>
+		<file>qtquickcontrols2.conf</file>
+    </qresource>
+</RCC>
