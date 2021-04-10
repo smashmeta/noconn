@@ -8,6 +8,7 @@
 #include <comdef.h>
 #include <Wbemidl.h>
 #include <iphlpapi.h>
+#include <fmt/core.h>
 #include "noconn/wbem_consumer.hpp"
 #include "whatlog/logger.hpp"
 
@@ -42,8 +43,7 @@ namespace noconn
 
             if (FAILED(hres))
             {
-                std::string error_message = "Failed to create IWbemLocator object. Error code = " + hresult_to_hex_str(hres);
-                log.error(error_message);
+                log.error(fmt::format("Failed to create IWbemLocator object. Error code = {}.", hresult_to_hex_str(hres)));
                 delete result;
                 return nullptr;
             }
@@ -64,8 +64,7 @@ namespace noconn
 
             if (FAILED(hres))
             {
-                std::string error_message = "Could not connect. Error code = " + hresult_to_hex_str(hres);
-                log.error(error_message);
+                log.error(fmt::format( "Could not connect. Error code = {}.", hresult_to_hex_str(hres)));
 
                 result->m_wbem_location->Release();
                 delete result;
@@ -90,8 +89,7 @@ namespace noconn
 
             if (FAILED(hres))
             {
-                std::string error_message = "Could not set proxy blanket. Error code = " + hresult_to_hex_str(hres);
-                log.error(error_message);
+                log.error(fmt::format("Could not set proxy blanket. Error code = {}.", hresult_to_hex_str(hres)));
 
                 result->m_wbem_services->Release();
                 result->m_wbem_location->Release();
@@ -112,8 +110,7 @@ namespace noconn
             HRESULT hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
             if (FAILED(hres))
             {
-                std::string error_message = "Failed to initialize COM library. Error code = " + hresult_to_hex_str(hres);
-                log.error(error_message);
+                log.error(fmt::format("Failed to initialize COM library. Error code = {}.", hresult_to_hex_str(hres)));
 
                 return false; // Program has failed.
             }
@@ -176,8 +173,7 @@ namespace noconn
         {
             std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
             std::string query_str = converter.to_bytes(query);
-            std::string error_message = "Query \"" + query_str + "\" failed. Error code = " + hresult_to_hex_str(hres);
-            log.error(error_message);
+            log.error(fmt::format("Query {} failed. Error code = {}.", query_str, hresult_to_hex_str(hres)));
         }
 
         return pEnumerator;

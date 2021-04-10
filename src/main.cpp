@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 
+#include <fmt/core.h>
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QtQuickControls2/QQuickStyle>
@@ -25,7 +27,7 @@ namespace noconn
 		}
 		catch (const std::exception& ex)
 		{
-			std::cout << "failed to initialize console logger. exception: " << ex.what() << std::endl;
+			std::cout << fmt::format("failed to initialize console logger. exception: {}", ex.what()) << std::endl;
 			return false;
 		}
 		catch (...)
@@ -66,25 +68,28 @@ int main(int argument_count, char** arguments)
     std::vector<noconn::network_adapter> adapters = noconn::get_network_adapters(consumer);
     for (const noconn::network_adapter& adapter : adapters)
     {
-        std::string adapter_info_txt = "name: " + adapter.m_name + ", index: " + std::to_string(adapter.m_adapter_index) + ", enabled: " + std::to_string(adapter.m_enabled);
+        std::string adapter_info_txt = fmt::format("name: {}, index: {}, enabled: {}, guid: {}.", adapter.m_name, adapter.m_adapter_index, adapter.m_enabled, adapter.m_guid);
         log.info(adapter_info_txt);
     }
 
-    // noconn::list_adapter_ip_addresses();
+    noconn::list_adapter_ip_addresses();
+    noconn::print_routing_table();
 
-    QQmlApplicationEngine engine;
-    QQuickStyle::setStyle("Material");
-    const QUrl url(QStringLiteral("qrc:/noconn.qml"));
+    // QQmlApplicationEngine engine;
+    // QQuickStyle::setStyle("Material");
+    // const QUrl url(QStringLiteral("qrc:/noconn.qml"));
+// 
+    // QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+	// 	&qt_application, [url](QObject* obj, const QUrl& objUrl) {
+	// 		if (!obj && url == objUrl)
+	// 			QCoreApplication::exit(-1);
+	// 	}, Qt::QueuedConnection);
+// 
+    // engine.load(url);
+// 
+    // log.info("Qt application started.");
+// 
+    // return qt_application.exec();
 
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-		&qt_application, [url](QObject* obj, const QUrl& objUrl) {
-			if (!obj && url == objUrl)
-				QCoreApplication::exit(-1);
-		}, Qt::QueuedConnection);
-
-    engine.load(url);
-
-    log.info("Qt application started.");
-
-    return qt_application.exec();
+    return EXIT_SUCCESS;
 }

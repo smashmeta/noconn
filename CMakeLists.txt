@@ -11,20 +11,30 @@ set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/noconn")
 set(CPACK_PACKAGE_CONTACT "smashmeta")
 
+# adding fmt dependencies
+set(fmt_Folder "D:/libraries/fmt-7.1.3")
+set(fmt_DIR "${fmt_Folder}/build")
+
+find_package(fmt)
+include_directories(${fmt_INCLUDE_DIRS})
+
+message( "fmt found? ${fmt_FOUND}")
+# end fmt dependencies
+
 # adding qt dependencies
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(Qt5_FOLDER "D:/libraries/qt_5_12_10/5.12.10/msvc2017_64")
-set(Qt5_ROOT_DIR "${Qt5_FOLDER}/lib/cmake/Qt5")
+set(Qt5_DIR "${Qt5_FOLDER}/lib/cmake/Qt5")
 find_package(Qt5 COMPONENTS Core Widgets qml Quick quickcontrols2 REQUIRED)
 
 include_directories(${Qt5Core_INCLUDE_DIRS})
 
 message( "Qt5 found? ${Qt5_FOUND}")
 message( "Qt5 include directories: ${Qt5Core_INCLUDE_DIRS}" )
-message( "Qt5 folder: ${Qt5_dir}")
+message( "Qt5 folder: ${Qt5_DIR}")
 # end qt dependencies
 
 # adding third party dependencies
@@ -54,6 +64,7 @@ target_link_libraries(noconn Qt5::Core Qt5::Widgets Qt5::Qml Qt5::Quick Qt5::Qui
 target_link_libraries(noconn wsock32 ws2_32 IPHLPAPI wbemuuid)
 target_link_libraries(noconn ${whatlog_LIBRARIES})
 target_link_libraries(noconn ${Boost_LIBRARIES})
+target_link_libraries(noconn fmt::fmt)
 
 # post-build steps
 # copy all the Qt support files to the debug/release directories

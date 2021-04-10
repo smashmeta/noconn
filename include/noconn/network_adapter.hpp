@@ -25,11 +25,7 @@ public:
     bool m_enabled;
 };
 
-struct ipv4
-{
-
-};
-
 std::vector<network_adapter> get_network_adapters(noconn::shared_wbem_consumer consumer);
 void list_adapter_ip_addresses();
+void print_routing_table();
 } // !namespace noconn
