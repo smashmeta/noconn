@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 3.20)
 set(NOCONN_VERSION 1.0.0)
 project(noconn VERSION ${NOCONN_VERSION} LANGUAGES CXX)
 
+# begin adding windows version setting
+add_definitions(-D_WIN32_WINNT=0x0600)
+# end adding windows version setting
+
 # CPack settings
 set(CPACK_PACKAGE_VENDOR "noconnection")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "network adapter monitoring tool for windows")
@@ -12,7 +16,7 @@ set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/noconn")
 set(CPACK_PACKAGE_CONTACT "smashmeta")
 
 # adding fmt dependencies
-set(fmt_Folder "D:/libraries/fmt-7.1.3")
+set(fmt_Folder "C:/Users/smashcomp/Desktop/void/libraries/fmt")
 set(fmt_DIR "${fmt_Folder}/build")
 
 find_package(fmt)
@@ -21,34 +25,27 @@ include_directories(${fmt_INCLUDE_DIRS})
 message( "fmt found? ${fmt_FOUND}")
 # end fmt dependencies
 
-# adding qt dependencies
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-set(Qt5_FOLDER "D:/libraries/qt_5_12_10/5.12.10/msvc2017_64")
-set(Qt5_DIR "${Qt5_FOLDER}/lib/cmake/Qt5")
-find_package(Qt5 COMPONENTS Core Widgets qml Quick quickcontrols2 REQUIRED)
-
-include_directories(${Qt5Core_INCLUDE_DIRS})
-
-message( "Qt5 found? ${Qt5_FOUND}")
-message( "Qt5 include directories: ${Qt5Core_INCLUDE_DIRS}" )
-message( "Qt5 folder: ${Qt5_DIR}")
-# end qt dependencies
+# adding cpprestsdk dependency
+# set(unofficial-brotli_DIR "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/packages/brotli_x64-windows/share/unofficial-brotli")
+# set(ZLIB_LIBRARY "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/packages/zlib_x64-windows/share/zlib")
+# set(cpprestsdk_ROOT "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/packages/cpprestsdk_x64-windows/share/cpprestsdk")
+# find_package(cpprestsdk REQUIRED)
+# include_directories(${cpprestsdk_INCLUDE_DIRS})
+# end cpprestsdk dependency
 
 # adding third party dependencies
-set(whatlog_DIR "d:/projects/whatlog")
+set(whatlog_DIR "C:/Users/smashcomp/Desktop/void/projects/whatlog")
 find_package(whatlog REQUIRED whatlog)
 include_directories(${whatlog_INCLUDE_DIRS})
 # end third party dependencies
 
 # adding boost dependencies
-set(Boost_USE_STATIC_LIBS ON)
-set(BOOST_ROOT "D:/libraries/boost_1_75_0")
-find_package(Boost REQUIRED filesystem log log_setup)
-
 add_definitions("-DBOOST_ALL_NO_LIB")
+set(Boost_USE_STATIC_LIBS ON)
+set(BOOST_ROOT "C:/Users/smashcomp/Desktop/void/libraries/boost_1_78_0")
+set(Boost_THREADAPI "win32") 
+find_package(Boost REQUIRED filesystem log log_setup json)
+
 include_directories(${Boost_INCLUDE_DIRS})
 
 message( "Boost found? ${Boost_FOUND}")
@@ -56,25 +53,32 @@ message( "Boost include dir is ${Boost_INCLUDE_DIRS}" )
 message( "Boost library dir is ${Boost_LIBRARIES}" )
 # end boost dependency
 
-add_executable(noconn src/main.cpp src/network_adapter.cpp src/wbem_consumer.cpp src/noconn.qrc 
-    include/noconn/network_adapter.hpp include/noconn/wbem_consumer.hpp )
+file(GLOB HEADERS_DEFAULT_GRP "${CMAKE_CURRENT_SOURCE_DIR}/include/noconn/*.hpp")
+file(GLOB HEADERS_REST_GRP "${CMAKE_CURRENT_SOURCE_DIR}/include/noconn/rest/*.hpp")
+file(GLOB SOURCE_DEFAULT_GRP "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB SOURCE_REST_GRP "${CMAKE_CURRENT_SOURCE_DIR}/src/rest/*.cpp")
+
+add_executable(noconn 
+    ${HEADERS_DEFAULT_GRP}
+	${SOURCE_DEFAULT_GRP}
+	${HEADERS_REST_GRP}
+	${SOURCE_REST_GRP}
+)
+
 target_include_directories(noconn PUBLIC "include")
 
-target_link_libraries(noconn Qt5::Core Qt5::Widgets Qt5::Qml Qt5::Quick Qt5::QuickControls2)
 target_link_libraries(noconn wsock32 ws2_32 IPHLPAPI wbemuuid)
 target_link_libraries(noconn ${whatlog_LIBRARIES})
 target_link_libraries(noconn ${Boost_LIBRARIES})
 target_link_libraries(noconn fmt::fmt)
+#target_link_libraries(noconn cpprestsdk::cpprest)
+
+# adding file filters to visual studio project
+source_group("header/" FILES ${HEADERS_DEFAULT_GRP})
+source_group("header/rest/" FILES ${HEADERS_REST_GRP})
+source_group("src/" FILES ${SOURCE_DEFAULT_GRP})
+source_group("src/rest/" FILES ${SOURCE_REST_GRP})
 
 # post-build steps
-# copy all the Qt support files to the debug/release directories
-# You really only need the proper qt redistibution dll's/files, but this copies everything for easier development. Trim files out as needed.
-# message("Copying required Qt libraries and binaries to output directory....")
+# message("example of how to copy files in a directory to our build directory")
 # add_custom_command(TARGET noconn POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/bin $<TARGET_FILE_DIR:noconn>)
-# add_custom_command(TARGET noconn POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/plugins $<TARGET_FILE_DIR:noconn>)
-# add_custom_command(TARGET noconn POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/qml $<TARGET_FILE_DIR:noconn>)
-
-add_custom_target(copy_files)
-add_custom_command(TARGET copy_files COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/bin $<TARGET_FILE_DIR:noconn>)
-add_custom_command(TARGET copy_files COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/plugins $<TARGET_FILE_DIR:noconn>)
-add_custom_command(TARGET copy_files COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/qml $<TARGET_FILE_DIR:noconn>)

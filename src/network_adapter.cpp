@@ -25,6 +25,12 @@ network_adapter::network_adapter(const std::string& name, const std::string& gui
     // nothing for now
 }
 
+route_entry::route_entry(const std::string& destination, const std::string& mask, const std::string& gateway, int interface_index, int metric)
+    : m_destination(destination), m_mask(mask), m_gateway(gateway), m_interface_index(interface_index), m_metric(metric)
+{
+    // nothing for now
+}
+
 void list_adapter_ip_addresses()
 {   
     whatlog::logger log("list_adapter_ip_addresses");
@@ -213,9 +219,10 @@ std::vector<network_adapter> get_network_adapters(noconn::shared_wbem_consumer c
     return result; 
 }
 
-void print_routing_table()
+std::vector<route_entry> list_routing_table()
 {
     whatlog::logger log("print_routing_table");
+    std::vector<route_entry> result;
 
     DWORD dwSize = 0;
     DWORD dwRetVal = 0;
@@ -253,10 +260,13 @@ void print_routing_table()
             IpAddr.S_un.S_addr = (u_long) pIpForwardTable->table[i].dwForwardNextHop;
             std::string gateway = inet_ntoa(IpAddr);
 
-            log.info(fmt::format("Route[{}] Dest IP: {}", i, destination));
-            log.info(fmt::format("Route[{}] Subnet Mask: {}", i, mask));
-            log.info(fmt::format("Route[{}] Gateway: {}", i, gateway));
-            log.info(fmt::format("Route[{}] If Index: {}", i, pIpForwardTable->table[i].dwForwardIfIndex));
+            int interface_index = pIpForwardTable->table[i].dwForwardIfIndex;
+            int metric = pIpForwardTable->table[i].dwForwardMetric1;
+
+            // log.info(fmt::format("Route[{}] Dest IP: {}", i, destination));
+            // log.info(fmt::format("Route[{}] Subnet Mask: {}", i, mask));
+            // log.info(fmt::format("Route[{}] Gateway: {}", i, gateway));
+            // log.info(fmt::format("Route[{}] If Index: {}", i, pIpForwardTable->table[i].dwForwardIfIndex));
             
             std::string route_type_desc;
             switch (pIpForwardTable->table[i].dwForwardType) 
@@ -278,7 +288,7 @@ void print_routing_table()
                 break;
             }
 
-            log.info(fmt::format("Route[{}] Type: {} -> {}", i, pIpForwardTable->table[i].dwForwardType, route_type_desc));
+            // log.info(fmt::format("Route[{}] Type: {} -> {}", i, pIpForwardTable->table[i].dwForwardType, route_type_desc));
             
             std::string proto_desc;
             switch (pIpForwardTable->table[i].dwForwardProto) 
@@ -339,14 +349,19 @@ void print_routing_table()
                 break;
             }
 
-            log.info(fmt::format("Route[{}] Proto: {} -> {}", i, pIpForwardTable->table[i].dwForwardProto, proto_desc));
-            log.info(fmt::format("Route[{}] Age: {}", i, pIpForwardTable->table[i].dwForwardAge));
-            log.info(fmt::format("Route[{}] Metric1: {}", i, pIpForwardTable->table[i].dwForwardMetric1));
+            route_entry entry(destination, mask, gateway, interface_index, metric);
+            result.push_back(entry);
+            
+            // log.info(fmt::format("Route[{}] Proto: {} -> {}", i, pIpForwardTable->table[i].dwForwardProto, proto_desc));
+            // log.info(fmt::format("Route[{}] Age: {}", i, pIpForwardTable->table[i].dwForwardAge));
+            // log.info(fmt::format("Route[{}] Metric1: {}", i, pIpForwardTable->table[i].dwForwardMetric1));
         }
         free(pIpForwardTable);
     } else {
         log.info("GetIpForwardTable failed.");
         free(pIpForwardTable);
     }
+
+    return result;
 }
 } // !namespace noconn
