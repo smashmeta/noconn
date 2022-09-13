@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.20)
 
 set(NOCONN_VERSION 1.0.0)
 project(noconn VERSION ${NOCONN_VERSION} LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
 
-# begin adding windows version setting
+# adding windows version setting
 add_definitions(-D_WIN32_WINNT=0x0600)
-# end adding windows version setting
 
 # CPack settings
 set(CPACK_PACKAGE_VENDOR "noconnection")
@@ -18,26 +18,14 @@ set(CPACK_PACKAGE_CONTACT "smashmeta")
 # adding fmt dependencies
 set(fmt_Folder "C:/Users/smashcomp/Desktop/void/libraries/fmt")
 set(fmt_DIR "${fmt_Folder}/build")
-
 find_package(fmt)
 include_directories(${fmt_INCLUDE_DIRS})
-
 message( "fmt found? ${fmt_FOUND}")
-# end fmt dependencies
 
-# adding cpprestsdk dependency
-# set(unofficial-brotli_DIR "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/packages/brotli_x64-windows/share/unofficial-brotli")
-# set(ZLIB_LIBRARY "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/packages/zlib_x64-windows/share/zlib")
-# set(cpprestsdk_ROOT "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/packages/cpprestsdk_x64-windows/share/cpprestsdk")
-# find_package(cpprestsdk REQUIRED)
-# include_directories(${cpprestsdk_INCLUDE_DIRS})
-# end cpprestsdk dependency
-
-# adding third party dependencies
+# adding whatlog dependencies
 set(whatlog_DIR "C:/Users/smashcomp/Desktop/void/projects/whatlog")
 find_package(whatlog REQUIRED whatlog)
 include_directories(${whatlog_INCLUDE_DIRS})
-# end third party dependencies
 
 # adding boost dependencies
 add_definitions("-DBOOST_ALL_NO_LIB")
@@ -45,24 +33,26 @@ set(Boost_USE_STATIC_LIBS ON)
 set(BOOST_ROOT "C:/Users/smashcomp/Desktop/void/libraries/boost_1_78_0")
 set(Boost_THREADAPI "win32") 
 find_package(Boost REQUIRED filesystem log log_setup json)
-
 include_directories(${Boost_INCLUDE_DIRS})
-
 message( "Boost found? ${Boost_FOUND}")
 message( "Boost include dir is ${Boost_INCLUDE_DIRS}" )
 message( "Boost library dir is ${Boost_LIBRARIES}" )
-# end boost dependency
 
+# setting up source files and header files groups
 file(GLOB HEADERS_DEFAULT_GRP "${CMAKE_CURRENT_SOURCE_DIR}/include/noconn/*.hpp")
 file(GLOB HEADERS_REST_GRP "${CMAKE_CURRENT_SOURCE_DIR}/include/noconn/rest/*.hpp")
+file(GLOB HEADERS_NET_GRP "${CMAKE_CURRENT_SOURCE_DIR}/include/noconn/net/*.hpp")
 file(GLOB SOURCE_DEFAULT_GRP "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 file(GLOB SOURCE_REST_GRP "${CMAKE_CURRENT_SOURCE_DIR}/src/rest/*.cpp")
+file(GLOB SOURCE_NET_GRP "${CMAKE_CURRENT_SOURCE_DIR}/src/net/*.cpp")
 
 add_executable(noconn 
     ${HEADERS_DEFAULT_GRP}
 	${SOURCE_DEFAULT_GRP}
 	${HEADERS_REST_GRP}
 	${SOURCE_REST_GRP}
+	${HEADERS_NET_GRP}
+	${SOURCE_NET_GRP}
 )
 
 target_include_directories(noconn PUBLIC "include")
@@ -71,13 +61,14 @@ target_link_libraries(noconn wsock32 ws2_32 IPHLPAPI wbemuuid)
 target_link_libraries(noconn ${whatlog_LIBRARIES})
 target_link_libraries(noconn ${Boost_LIBRARIES})
 target_link_libraries(noconn fmt::fmt)
-#target_link_libraries(noconn cpprestsdk::cpprest)
 
 # adding file filters to visual studio project
 source_group("header/" FILES ${HEADERS_DEFAULT_GRP})
 source_group("header/rest/" FILES ${HEADERS_REST_GRP})
+source_group("header/net/" FILES ${HEADERS_NET_GRP})
 source_group("src/" FILES ${SOURCE_DEFAULT_GRP})
 source_group("src/rest/" FILES ${SOURCE_REST_GRP})
+source_group("src/net/" FILES ${SOURCE_NET_GRP})
 
 # post-build steps
 # message("example of how to copy files in a directory to our build directory")

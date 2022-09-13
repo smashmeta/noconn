@@ -9,10 +9,12 @@
 #include <Wbemidl.h>
 #include <iphlpapi.h>
 #include <fmt/core.h>
-#include "noconn/wbem_consumer.hpp"
+#include "noconn/net/wbem_consumer.hpp"
 #include "whatlog/logger.hpp"
 
 namespace noconn
+{
+namespace net
 {
     namespace 
     {
@@ -178,4 +180,5 @@ namespace noconn
 
         return pEnumerator;
     }
+} // !namespace net
 } // !namespace noconn

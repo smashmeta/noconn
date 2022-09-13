@@ -4,12 +4,15 @@
 
 #pragma once
 
+#include <string>
 #include <memory>
 #include <Wbemidl.h>
 
+
 namespace noconn
 {
-
+namespace net
+{
 /*
  * WMI (Windows Management Instrumentation) consists of a set of extensions to the 
  * Windows Driver Model that provides an operating system interface through which instrumented
@@ -40,4 +43,5 @@ private:
 
     impl* m_impl;
 };
+} // !namespace net
 } // !namespace noconn

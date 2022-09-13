@@ -61,14 +61,14 @@ namespace
 		:	m_stream(std::move(socket)), m_id(session_id), m_server(server)
 	{
 		whatlog::logger log("connection::ctor()");
-		log.info(fmt::format("{} == [CREATED] on socket {}.", m_id, to_string(m_stream.socket())));
+		log.info(fmt::format("{} [CREATED] on socket {}.", m_id, to_string(m_stream.socket())));
 		// nothing for now
 	}
 
 	connection::~connection()
 	{
 		whatlog::logger log("connection::ctor()");
-		log.info(fmt::format("{} == [TERMINATED] connection.", m_id));
+		log.info(fmt::format("{} [TERMINATED] connection.", m_id));
 	}
 
 	shared_connection connection::create(boost::asio::ip::tcp::socket&& socket, shared_server server)
@@ -104,7 +104,7 @@ namespace
 			error_code == boost::asio::error::eof ||
 			error_code == boost::asio::error::timed_out)
 		{
-			log.info(fmt::format("{} == [CLOSED] by remote endpoint.", m_id));
+			log.info(fmt::format("{} [CLOSED] by remote endpoint.", m_id));
 
 			// connection closed by sender
 			close();
@@ -113,7 +113,7 @@ namespace
 
 		if (error_code)
 		{
-			log.error(fmt::format("{} == [ERROR] during read. message: {}.", m_id, error_code.message()));
+			log.error(fmt::format("{} [ERROR] during read. message: {}.", m_id, error_code.message()));
 			close();
 			return;
 		}
@@ -122,7 +122,7 @@ namespace
 			std::string target = m_request.target().to_string();
 			std::string method = m_request.method_string().to_string();
 			std::string body = m_request.body();
-			log.info(fmt::format("{} => [REQUEST] target: {}, method: {}, body: {}.", m_id, target, method, body));
+			log.info(fmt::format("{} [REQUEST] target: {}, method: {}, body: {}.", m_id, target, method, body));
 		}
 
 		// Make sure we can handle the method
@@ -163,7 +163,7 @@ namespace
 
 		{
 			std::string body = m_response.body();
-			log.info(fmt::format("{} <= [RESPONSE] body: {}.", m_id, body));
+			log.info(fmt::format("{} [RESPONSE] body: {}.", m_id, body));
 		}
 
 		boost::beast::http::async_write(
@@ -185,7 +185,7 @@ namespace
 
 		if (error_code)
 		{
-			log.error(fmt::format("{} == [FAILED] write. message: {}.", m_id, error_code.message()));
+			log.error(fmt::format("{} [FAILED] write. message: {}.", m_id, error_code.message()));
 		}
 
 		if (close_connection)
@@ -200,12 +200,12 @@ namespace
 		boost::beast::error_code error_code;
 		whatlog::logger log("connection::close");
 
-		log.info(fmt::format("{} == [DISCONNECTED].", m_id));
+		log.info(fmt::format("{} [DISCONNECTED].", m_id));
 		m_stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, error_code);
 
 		if (error_code)
 		{
-			log.error(fmt::format("{} == [ERROR] during shutdown of session. message: {}.", m_id, error_code.message()));
+			log.error(fmt::format("{} [ERROR] during shutdown of session. message: {}.", m_id, error_code.message()));
 		}
 
 		m_server->close(shared_from_this());
