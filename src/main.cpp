@@ -365,8 +365,8 @@ int main(int argument_count, char** arguments)
     noconn::request_handler req_handler;
     req_handler.handle("my_page/inet/route", "get", "");
 
-    // Invoke-RestMethod -Uri 'http://192.168.0.13:3031/test' -Method GET
-    const auto address = boost::asio::ip::make_address("192.168.0.13");
+    // Invoke-RestMethod -Uri 'http://172.20.10.3:3031/test' -Method GET
+    const auto address = boost::asio::ip::make_address("172.20.10.3");
     const unsigned short port = 3031;
     const auto document_root = std::make_shared<std::string>(".");
     

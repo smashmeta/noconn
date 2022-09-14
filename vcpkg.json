@@ -1,0 +1,16 @@
+{
+  "name": "noconn",
+  "version-string": "1.0.0",
+  "dependencies": [
+	"fmt",
+	"boost-dll",
+	"boost-log",
+	"boost-thread",
+	"boost-filesystem",
+	"boost-beast",
+	"boost-algorithm",
+	"boost-asio",
+	"boost-signals2",
+	"boost-json"
+  ]
+}

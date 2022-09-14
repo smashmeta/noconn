@@ -1,10 +1,6 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-set(NOCONN_VERSION 1.0.0)
-project(noconn VERSION ${NOCONN_VERSION} LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 20)
-
 # adding windows version setting
 add_definitions(-D_WIN32_WINNT=0x0600)
 
@@ -15,28 +11,22 @@ set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/noconn")
 set(CPACK_PACKAGE_CONTACT "smashmeta")
 
+set(CMAKE_TOOLCHAIN_FILE "C:/Users/fredrhe/Desktop/void/programs/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(whatlog_DIR "C:/Users/fredrhe/Desktop/void/projects/whatlog")
+
+set(NOCONN_VERSION 1.0.0)
+project(noconn VERSION ${NOCONN_VERSION} LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+
 # adding fmt dependencies
-set(fmt_Folder "C:/Users/smashcomp/Desktop/void/libraries/fmt")
-set(fmt_DIR "${fmt_Folder}/build")
-find_package(fmt)
-include_directories(${fmt_INCLUDE_DIRS})
-message( "fmt found? ${fmt_FOUND}")
+find_package(fmt CONFIG REQUIRED)
 
 # adding whatlog dependencies
-set(whatlog_DIR "C:/Users/smashcomp/Desktop/void/projects/whatlog")
 find_package(whatlog REQUIRED whatlog)
 include_directories(${whatlog_INCLUDE_DIRS})
 
 # adding boost dependencies
-add_definitions("-DBOOST_ALL_NO_LIB")
-set(Boost_USE_STATIC_LIBS ON)
-set(BOOST_ROOT "C:/Users/smashcomp/Desktop/void/libraries/boost_1_78_0")
-set(Boost_THREADAPI "win32") 
-find_package(Boost REQUIRED filesystem log log_setup json)
-include_directories(${Boost_INCLUDE_DIRS})
-message( "Boost found? ${Boost_FOUND}")
-message( "Boost include dir is ${Boost_INCLUDE_DIRS}" )
-message( "Boost library dir is ${Boost_LIBRARIES}" )
+find_package(Boost REQUIRED filesystem json thread log)
 
 # setting up source files and header files groups
 file(GLOB HEADERS_DEFAULT_GRP "${CMAKE_CURRENT_SOURCE_DIR}/include/noconn/*.hpp")
