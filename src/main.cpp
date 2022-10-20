@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <optional>
+#include <boost/version.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
@@ -321,8 +322,6 @@ namespace noconn
         whatlog::logger log("work_handler");
         log.info(fmt::format("starting thread {}.", thread_name));
 
-        temporary();
-
         for (;;)
         {
             try
@@ -359,14 +358,16 @@ int main(int argument_count, char** arguments)
 
     boost::filesystem::path executable_directory = boost::dll::program_location().parent_path();
     std::cout << "current path is set to " << executable_directory << std::endl;
-    whatlog::logger::initialize_file_logger(executable_directory, "noconn.log");
+    whatlog::logger::initialize_file_logger(executable_directory, "noconn");
     whatlog::logger log("main");
 
+    log.info(fmt::format("built with [boost: {}, fmt: {}].", BOOST_LIB_VERSION, FMT_VERSION));
+    
     noconn::request_handler req_handler;
     req_handler.handle("my_page/inet/route", "get", "");
 
-    // Invoke-RestMethod -Uri 'http://172.20.10.3:3031/test' -Method GET
-    const auto address = boost::asio::ip::make_address("172.20.10.3");
+    // Invoke-RestMethod -Uri 'http://192.168.0.15:3031/test' -Method GET
+    const auto address = boost::asio::ip::make_address("192.168.0.15");
     const unsigned short port = 3031;
     const auto document_root = std::make_shared<std::string>(".");
     

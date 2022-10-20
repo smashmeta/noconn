@@ -162,8 +162,10 @@ namespace
 		m_response.keep_alive(m_request.keep_alive());
 
 		{
+			whatlog::logger log_output("on_read", "input_output");
 			std::string body = m_response.body();
 			log.info(fmt::format("{} [RESPONSE] body: {}.", m_id, body));
+			log_output.info(fmt::format("{} [RESPONSE] body: {}.", m_id, body));
 		}
 
 		boost::beast::http::async_write(

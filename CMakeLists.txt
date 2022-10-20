@@ -11,19 +11,22 @@ set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/noconn")
 set(CPACK_PACKAGE_CONTACT "smashmeta")
 
-set(CMAKE_TOOLCHAIN_FILE "C:/Users/fredrhe/Desktop/void/programs/vcpkg/scripts/buildsystems/vcpkg.cmake")
-set(whatlog_DIR "C:/Users/fredrhe/Desktop/void/projects/whatlog")
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install")
+include(GNUInstallDirs)
+
+set(CMAKE_TOOLCHAIN_FILE "C:/Users/smashcomp/Desktop/void/libraries/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 set(NOCONN_VERSION 1.0.0)
 project(noconn VERSION ${NOCONN_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_DEBUG_POSTFIX d)
 
 # adding fmt dependencies
 find_package(fmt CONFIG REQUIRED)
 
 # adding whatlog dependencies
+set(whatlog_DIR "C:/Users/smashcomp/Desktop/void/projects/whatlog/install/cmake")
 find_package(whatlog REQUIRED whatlog)
-include_directories(${whatlog_INCLUDE_DIRS})
 
 # adding boost dependencies
 find_package(Boost REQUIRED filesystem json thread log)
@@ -45,12 +48,20 @@ add_executable(noconn
 	${SOURCE_NET_GRP}
 )
 
-target_include_directories(noconn PUBLIC "include")
+set_target_properties(noconn PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-target_link_libraries(noconn wsock32 ws2_32 IPHLPAPI wbemuuid)
-target_link_libraries(noconn ${whatlog_LIBRARIES})
-target_link_libraries(noconn ${Boost_LIBRARIES})
-target_link_libraries(noconn fmt::fmt)
+target_include_directories(noconn
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
+
+target_link_libraries(noconn 
+	PUBLIC 
+		wsock32 ws2_32 IPHLPAPI wbemuuid
+		Boost::json Boost::log Boost::log_setup
+		whatlog::whatlog
+		fmt::fmt
+)
 
 # adding file filters to visual studio project
 source_group("header/" FILES ${HEADERS_DEFAULT_GRP})
@@ -60,6 +71,29 @@ source_group("src/" FILES ${SOURCE_DEFAULT_GRP})
 source_group("src/rest/" FILES ${SOURCE_REST_GRP})
 source_group("src/net/" FILES ${SOURCE_NET_GRP})
 
+############# force copy of dependencies to build folder #############
+
+add_custom_command( 
+	TARGET noconn POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_RUNTIME_DLLS:noconn>
+        $<TARGET_FILE_DIR:noconn>
+        COMMAND_EXPAND_LISTS
+)
+
+############# INSTALL SECTION #######################################
+
+install(TARGETS ${PROJECT_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+# install(TARGETS ${PROJECT_NAME} 
+# 	RUNTIME_DEPENDENCY_SET
+# 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+# ) 
+	
 # post-build steps
 # message("example of how to copy files in a directory to our build directory")
 # add_custom_command(TARGET noconn POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${Qt5_FOLDER}/bin $<TARGET_FILE_DIR:noconn>)

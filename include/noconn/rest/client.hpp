@@ -13,9 +13,12 @@ namespace rest
 	class client
 	{
 	public:
-		void send_message();
+		void send_response();
 	private:
-		void handle_message();
+		void handle_request(const std::string& path, const std::string& method, const std::string& payload)
+		{
+			
+		}
 	private:
 		shared_connection m_request_handler;
 	};
